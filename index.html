@@ -4,6 +4,7 @@ let score = 0;
 let bg, doodlerLeft, doodlerRight;
 
 function preload() {
+    // Загрузка изображений
     bg = loadImage('bg.png'); // Фон
     doodlerLeft = loadImage('doodler-left.png'); // Левое изображение
     doodlerRight = loadImage('doodler-right.png'); // Правое изображение
@@ -11,6 +12,8 @@ function preload() {
 
 function setup() {
     createCanvas(400, 600);
+
+    // Создание персонажа
     doodler = new Doodler(doodlerLeft, doodlerRight);
 
     // Создание платформ
@@ -22,9 +25,11 @@ function setup() {
 }
 
 function draw() {
-    image(bg, 0, 0); // Отрисовка фона
+    // Отрисовка фона
+    image(bg, 0, 0);
 
-    translate(0, height / 2 - doodler.y); // Смещение камеры
+    // Смещение камеры
+    translate(0, height / 2 - doodler.y);
     doodler.update(platforms);
     doodler.draw();
 
@@ -54,7 +59,7 @@ function draw() {
 
     // Проигрыш при падении
     if (doodler.y > height) {
-        noLoop();
+        noLoop(); // Остановить игру
         alert("Вы проиграли!");
     }
 }
@@ -136,6 +141,10 @@ class Platform {
     }
 
     draw() {
+        fill(100, 255, 100);
+        rect(this.x, this.y, this.width, this.height);
+    }
+}
         fill(100, 255, 100);
         rect(this.x, this.y, this.width, this.height);
     }
