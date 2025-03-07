@@ -16,7 +16,7 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         
-        let cat = { x: 200, y: 500, width: 40, height: 40, dy: 0 };
+        let cat = { x: 200, y: 500, width: 40, height: 40, dy: 0, dx: 0, onGround: false };
         let gravity = 0.5;
         let jumpPower = -10;
         let platforms = [{ x: 150, y: 550, width: 100, height: 10 }];
@@ -34,12 +34,26 @@
         function update() {
             cat.dy += gravity;
             cat.y += cat.dy;
+            cat.x += cat.dx;
             
+            // Проверка столкновений с платформами
+            cat.onGround = false;
             platforms.forEach(p => {
                 if (cat.y + cat.height >= p.y && cat.y + cat.height <= p.y + 10 && cat.x + cat.width > p.x && cat.x < p.x + p.width) {
-                    cat.dy = jumpPower;
+                    cat.dy = 0;
+                    cat.y = p.y - cat.height;
+                    cat.onGround = true;
                 }
             });
+            
+            // Ограничение выхода за границы экрана
+            if (cat.x < 0) cat.x = 0;
+            if (cat.x + cat.width > canvas.width) cat.x = canvas.width - cat.width;
+            if (cat.y + cat.height > canvas.height) {
+                cat.y = canvas.height - cat.height;
+                cat.dy = 0;
+                cat.onGround = true;
+            }
         }
         
         function gameLoop() {
@@ -51,8 +65,20 @@
         }
         
         document.addEventListener("keydown", (e) => {
-            if (e.code === "Space") {
+            if (e.code === "Space" && cat.onGround) {
                 cat.dy = jumpPower;
+            }
+            if (e.code === "ArrowLeft") {
+                cat.dx = -5;
+            }
+            if (e.code === "ArrowRight") {
+                cat.dx = 5;
+            }
+        });
+        
+        document.addEventListener("keyup", (e) => {
+            if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
+                cat.dx = 0;
             }
         });
         
