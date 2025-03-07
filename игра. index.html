@@ -16,10 +16,23 @@
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
         
-        let cat = { x: 200, y: 500, width: 40, height: 40, dy: 0, dx: 0, onGround: false };
+        let cat = { 
+            x: 180, 
+            y: 500, 
+            width: 40, 
+            height: 40, 
+            dy: 0, 
+            dx: 0, 
+            onGround: false 
+        };
+        
         let gravity = 0.5;
         let jumpPower = -10;
-        let platforms = [{ x: 150, y: 550, width: 100, height: 10 }];
+        let platforms = [
+            { x: 150, y: 540, width: 100, height: 10 }, // Платформа ниже
+            { x: 50, y: 400, width: 100, height: 10 },  // Дополнительные платформы
+            { x: 250, y: 300, width: 100, height: 10 }
+        ];
         
         function drawCat() {
             ctx.fillStyle = "orange";
@@ -32,6 +45,7 @@
         }
         
         function update() {
+            // Гравитация
             cat.dy += gravity;
             cat.y += cat.dy;
             cat.x += cat.dx;
@@ -39,16 +53,21 @@
             // Проверка столкновений с платформами
             cat.onGround = false;
             platforms.forEach(p => {
-                if (cat.y + cat.height >= p.y && cat.y + cat.height <= p.y + 10 && cat.x + cat.width > p.x && cat.x < p.x + p.width) {
+                if (cat.y + cat.height >= p.y && 
+                    cat.y + cat.height <= p.y + p.height &&
+                    cat.x + cat.width > p.x &&
+                    cat.x < p.x + p.width) {
+                    
                     cat.dy = 0;
                     cat.y = p.y - cat.height;
                     cat.onGround = true;
                 }
             });
             
-            // Ограничение выхода за границы экрана
+            // Ограничение границ
             if (cat.x < 0) cat.x = 0;
             if (cat.x + cat.width > canvas.width) cat.x = canvas.width - cat.width;
+            
             if (cat.y + cat.height > canvas.height) {
                 cat.y = canvas.height - cat.height;
                 cat.dy = 0;
@@ -58,28 +77,23 @@
         
         function gameLoop() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            drawCat();
             drawPlatforms();
+            drawCat();
             update();
             requestAnimationFrame(gameLoop);
         }
         
+        // Управление
         document.addEventListener("keydown", (e) => {
             if (e.code === "Space" && cat.onGround) {
                 cat.dy = jumpPower;
             }
-            if (e.code === "ArrowLeft") {
-                cat.dx = -5;
-            }
-            if (e.code === "ArrowRight") {
-                cat.dx = 5;
-            }
+            if (e.code === "ArrowLeft") cat.dx = -5;
+            if (e.code === "ArrowRight") cat.dx = 5;
         });
         
         document.addEventListener("keyup", (e) => {
-            if (e.code === "ArrowLeft" || e.code === "ArrowRight") {
-                cat.dx = 0;
-            }
+            if (["ArrowLeft", "ArrowRight"].includes(e.code)) cat.dx = 0;
         });
         
         gameLoop();
