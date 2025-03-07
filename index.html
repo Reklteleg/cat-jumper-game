@@ -5,12 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Doodle Jump</title>
     <style>
-        body { margin: 0; padding: 0; background: #87CEEB; overflow: hidden; }
-        canvas { display: block; width: 100%; height: 100%; background: white; }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #87CEEB;
+            overflow: hidden;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            background: white;
+        }
+
+        /* Стили для кнопок */
+        .controls {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: space-around;
+            pointer-events: none; /* Чтобы кнопки не мешали взаимодействию */
+        }
+        .controls button {
+            background-color: rgba(255, 255, 255, 0.5); /* Прозрачные кнопки */
+            border: 2px solid #000;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            cursor: pointer;
+            pointer-events: auto; /* Включаем взаимодействие с кнопками */
+        }
+        .controls button:hover {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
     </style>
 </head>
 <body>
     <canvas id="gameCanvas"></canvas>
+    <div class="controls">
+        <button id="leftButton">&#8592;</button> <!-- Стрелка влево -->
+        <button id="rightButton">&#8594;</button> <!-- Стрелка вправо -->
+    </div>
     <script>
         const canvas = document.getElementById("gameCanvas");
         const ctx = canvas.getContext("2d");
@@ -30,21 +67,12 @@
             onPlatform: false
         };
 
-        // Платформы
-        const platforms = [];
-        const platformCount = 6;
-        const platformHeight = 10;
-        const platformWidth = 100;
-
-        // Генерация начальных платформ
-        for (let i = 0; i < platformCount; i++) {
-            platforms.push({
-                x: Math.random() * (canvas.width - platformWidth),
-                y: canvas.height - 50 - i * 150,
-                width: platformWidth,
-                height: platformHeight
-            });
-        }
+        // Платформы (только три планки)
+        const platforms = [
+            { x: canvas.width / 2 - 50, y: canvas.height - 60, width: 100, height: 10 },
+            { x: 50, y: canvas.height - 200, width: 100, height: 10 },
+            { x: canvas.width - 150, y: canvas.height - 350, width: 100, height: 10 }
+        ];
 
         // Гравитация и прыжок
         const gravity = 0.5;
@@ -91,18 +119,6 @@
             if (player.x < 0) player.x = 0;
             if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
 
-            // Бесконечный цикл платформ
-            if (player.y < canvas.height / 2) {
-                player.y = canvas.height / 2;
-                platforms.forEach(platform => {
-                    platform.y += Math.abs(player.dy);
-                    if (platform.y > canvas.height) {
-                        platform.y = 0;
-                        platform.x = Math.random() * (canvas.width - platformWidth);
-                    }
-                });
-            }
-
             // Проигрыш при падении
             if (player.y > canvas.height) {
                 alert("Вы проиграли!");
@@ -116,16 +132,6 @@
             player.y = canvas.height - 150;
             player.dy = 0;
             player.dx = 0;
-
-            platforms.length = 0;
-            for (let i = 0; i < platformCount; i++) {
-                platforms.push({
-                    x: Math.random() * (canvas.width - platformWidth),
-                    y: canvas.height - 50 - i * 150,
-                    width: platformWidth,
-                    height: platformHeight
-                });
-            }
         }
 
         // Основной игровой цикл
@@ -137,14 +143,22 @@
             requestAnimationFrame(gameLoop);
         }
 
-        // Управление
-        document.addEventListener("keydown", (e) => {
-            if (e.code === "ArrowLeft") player.dx = -5;
-            if (e.code === "ArrowRight") player.dx = 5;
+        // Управление через кнопки
+        const leftButton = document.getElementById("leftButton");
+        const rightButton = document.getElementById("rightButton");
+
+        leftButton.addEventListener("touchstart", () => {
+            player.dx = -5; // Движение влево
+        });
+        leftButton.addEventListener("touchend", () => {
+            player.dx = 0; // Остановка
         });
 
-        document.addEventListener("keyup", (e) => {
-            if (["ArrowLeft", "ArrowRight"].includes(e.code)) player.dx = 0;
+        rightButton.addEventListener("touchstart", () => {
+            player.dx = 5; // Движение вправо
+        });
+        rightButton.addEventListener("touchend", () => {
+            player.dx = 0; // Остановка
         });
 
         // Запуск игры
