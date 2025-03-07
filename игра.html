@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кот-прыгун</title>
+    <style>
+        body { text-align: center; background: #87CEEB; }
+        canvas { background: white; display: block; margin: auto; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Кот-прыгун</h1>
+    <canvas id="gameCanvas" width="400" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        if (!canvas) {
+            console.error("Canvas element not found!");
+        }
+        const ctx = canvas.getContext("2d");
+
+        let cat = { 
+            x: 180, 
+            y: 490, 
+            width: 40, 
+            height: 40, 
+            dy: 0, 
+            dx: 0, 
+            onGround: false 
+        };
+
+        let gravity = 0.5;
+        let jumpPower = -10;
+
+        let platforms = [
+            { x: 150, y: 530, width: 100, height: 10 },
+            { x: 50, y: 400, width: 100, height: 10 },
+            { x: 250, y: 300, width: 100, height: 10 }
+        ];
+
+        function drawCat() {
+            ctx.fillStyle = "orange";
+            ctx.fillRect(cat.x, cat.y, cat.width, cat.height);
+        }
+
+        function drawPlatforms() {
+            ctx.fillStyle = "green";
+            platforms.forEach(p => ctx.fillRect(p.x, p.y, p.width, p.height));
+        }
+
+        function update() {
+            cat.dy += gravity;
+            cat.y += cat.dy;
+            cat.x += cat.dx;
+
+            cat.onGround = false;
+            platforms.forEach(p => {
+                if (
+                    cat.x < p.x + p.width &&
+                    cat.x + cat.width > p.x &&
+                    cat.y + cat.height >= p.y &&
+                    cat.y + cat.height <= p.y + p.height
+                ) {
+                    cat.dy = 0;
+                    cat.y = p.y - cat.height;
+                    cat.onGround = true;
+                }
+            });
+
+            if (cat.x < 0) cat.x = 0;
+            if (cat.x + cat.width > canvas.width) cat.x = canvas.width - cat.width;
+            if (cat.y + cat.height > canvas.height) {
+                cat.y = canvas.height - cat.height;
+                cat.dy = 0;
+                cat.onGround = true;
+            }
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlatforms();
+            drawCat();
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (e.code === "Space" && cat.onGround) cat.dy = jumpPower;
+            if (e.code === "ArrowLeft") cat.dx = -5;
+            if (e.code === "ArrowRight") cat.dx = 5;
+        });
+
+        document.addEventListener("keyup", (e) => {
+            if (["ArrowLeft", "ArrowRight"].includes(e.code)) cat.dx = 0;
+        });
+
+        gameLoop();
+    </script>
+</body>
+</html>
