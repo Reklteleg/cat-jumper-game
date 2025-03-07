@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Кот-прыгун</title>
+    <title>Doodle Jump</title>
     <style>
-        body { margin: 0; padding: 0; background: #87CEEB; }
+        body { margin: 0; padding: 0; background: #87CEEB; overflow: hidden; }
         canvas { display: block; width: 100%; height: 100%; background: white; }
     </style>
 </head>
@@ -13,112 +13,142 @@
     <canvas id="gameCanvas"></canvas>
     <script>
         const canvas = document.getElementById("gameCanvas");
-        if (!canvas) {
-            console.error("Canvas element not found!");
-        } else {
-            const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext("2d");
 
-            // Настройка размеров canvas
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        // Настройка размеров canvas
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
 
-            // Загрузка изображения кота
-            const catImage = new Image();
-            catImage.src = "https://i.imgur.com/9zqZ5vL.png"; // Изображение кота
+        // Персонаж (кот)
+        const player = {
+            x: canvas.width / 2 - 20,
+            y: canvas.height - 150,
+            width: 40,
+            height: 40,
+            dy: 0,
+            dx: 0,
+            onPlatform: false
+        };
 
-            let cat = { 
-                x: canvas.width / 2 - 20, 
-                y: canvas.height - 150, 
-                width: 40, 
-                height: 40, 
-                dy: 0, 
-                dx: 0, 
-                onGround: false 
-            };
+        // Платформы
+        const platforms = [];
+        const platformCount = 6;
+        const platformHeight = 10;
+        const platformWidth = 100;
 
-            let gravity = 0.5;
-            let jumpPower = -12; // Увеличенная сила прыжка
+        // Генерация начальных платформ
+        for (let i = 0; i < platformCount; i++) {
+            platforms.push({
+                x: Math.random() * (canvas.width - platformWidth),
+                y: canvas.height - 50 - i * 150,
+                width: platformWidth,
+                height: platformHeight
+            });
+        }
 
-            // Лежанки вместо платформ
-            let platforms = [
-                { x: canvas.width / 2 - 50, y: canvas.height - 60, width: 100, height: 10 },
-                { x: 50, y: canvas.height - 200, width: 100, height: 10 },
-                { x: canvas.width - 150, y: canvas.height - 300, width: 100, height: 10 }
-            ];
+        // Гравитация и прыжок
+        const gravity = 0.5;
+        const jumpPower = -10;
 
-            function drawCat() {
-                ctx.drawImage(catImage, cat.x, cat.y, cat.width, cat.height);
-            }
+        // Отрисовка персонажа
+        function drawPlayer() {
+            ctx.fillStyle = "orange";
+            ctx.fillRect(player.x, player.y, player.width, player.height);
+        }
 
-            function drawPlatforms() {
-                ctx.fillStyle = "#FFD700"; // Цвет лежанок
-                platforms.forEach(p => ctx.fillRect(p.x, p.y, p.width, p.height));
-            }
+        // Отрисовка платформ
+        function drawPlatforms() {
+            ctx.fillStyle = "green";
+            platforms.forEach(platform => {
+                ctx.fillRect(platform.x, platform.y, platform.width, platform.height);
+            });
+        }
 
-            function update() {
-                cat.dy += gravity;
-                cat.y += cat.dy;
-                cat.x += cat.dx;
+        // Обновление состояния игры
+        function update() {
+            // Гравитация
+            player.dy += gravity;
+            player.y += player.dy;
 
-                cat.onGround = false;
-                platforms.forEach(p => {
-                    if (
-                        cat.x < p.x + p.width &&
-                        cat.x + cat.width > p.x &&
-                        cat.y + cat.height >= p.y &&
-                        cat.y + cat.height <= p.y + p.height
-                    ) {
-                        cat.dy = 0;
-                        cat.y = p.y - cat.height;
-                        cat.onGround = true;
+            // Горизонтальное движение
+            player.x += player.dx;
+
+            // Коллизии с платформами
+            platforms.forEach(platform => {
+                if (
+                    player.y + player.height >= platform.y &&
+                    player.y + player.height <= platform.y + platform.height &&
+                    player.x + player.width > platform.x &&
+                    player.x < platform.x + platform.width &&
+                    player.dy > 0
+                ) {
+                    player.dy = jumpPower; // Прыжок
+                    player.onPlatform = true;
+                }
+            });
+
+            // Ограничение границ экрана
+            if (player.x < 0) player.x = 0;
+            if (player.x + player.width > canvas.width) player.x = canvas.width - player.width;
+
+            // Бесконечный цикл платформ
+            if (player.y < canvas.height / 2) {
+                player.y = canvas.height / 2;
+                platforms.forEach(platform => {
+                    platform.y += Math.abs(player.dy);
+                    if (platform.y > canvas.height) {
+                        platform.y = 0;
+                        platform.x = Math.random() * (canvas.width - platformWidth);
                     }
                 });
-
-                if (cat.x < 0) cat.x = 0;
-                if (cat.x + cat.width > canvas.width) cat.x = canvas.width - cat.width;
-                if (cat.y + cat.height > canvas.height) {
-                    cat.y = canvas.height - cat.height;
-                    cat.dy = 0;
-                    cat.onGround = true;
-                }
             }
 
-            function gameLoop() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                drawPlatforms();
-                drawCat();
-                update();
-                requestAnimationFrame(gameLoop);
+            // Проигрыш при падении
+            if (player.y > canvas.height) {
+                alert("Вы проиграли!");
+                resetGame();
             }
-
-            // Сенсорное управление
-            let touchStartX = 0;
-
-            canvas.addEventListener("touchstart", (e) => {
-                touchStartX = e.touches[0].clientX;
-
-                if (cat.onGround) {
-                    cat.dy = jumpPower; // Прыжок
-                }
-            });
-
-            canvas.addEventListener("touchmove", (e) => {
-                let touchMoveX = e.touches[0].clientX;
-                let deltaX = touchMoveX - touchStartX;
-
-                if (deltaX > 50) {
-                    cat.dx = -5; // Движение влево
-                } else if (deltaX < -50) {
-                    cat.dx = 5; // Движение вправо
-                }
-            });
-
-            canvas.addEventListener("touchend", () => {
-                cat.dx = 0; // Остановка движения
-            });
-
-            gameLoop();
         }
+
+        // Сброс игры
+        function resetGame() {
+            player.x = canvas.width / 2 - 20;
+            player.y = canvas.height - 150;
+            player.dy = 0;
+            player.dx = 0;
+
+            platforms.length = 0;
+            for (let i = 0; i < platformCount; i++) {
+                platforms.push({
+                    x: Math.random() * (canvas.width - platformWidth),
+                    y: canvas.height - 50 - i * 150,
+                    width: platformWidth,
+                    height: platformHeight
+                });
+            }
+        }
+
+        // Основной игровой цикл
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawPlatforms();
+            drawPlayer();
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Управление
+        document.addEventListener("keydown", (e) => {
+            if (e.code === "ArrowLeft") player.dx = -5;
+            if (e.code === "ArrowRight") player.dx = 5;
+        });
+
+        document.addEventListener("keyup", (e) => {
+            if (["ArrowLeft", "ArrowRight"].includes(e.code)) player.dx = 0;
+        });
+
+        // Запуск игры
+        gameLoop();
     </script>
 </body>
 </html>
