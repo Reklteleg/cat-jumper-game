@@ -1,23 +1,32 @@
 #controls {
-    position: absolute;
+    position: fixed;
     bottom: 20px;
-    width: 100%;
+    left: 0;
+    right: 0;
     display: flex;
     justify-content: space-around;
-    pointer-events: none; /* Чтобы кнопки не мешали взаимодействию */
+    padding: 0 20px;
+    pointer-events: none; /* Чтобы кнопки не блокировали взаимодействие с canvas */
 }
 
 #controls button {
-    background-color: rgba(255, 255, 255, 0.5); /* Прозрачные кнопки */
-    border: 2px solid #000;
-    border-radius: 50%;
-    width: 60px;
-    height: 60px;
-    font-size: 24px;
+    background-color: rgba(255, 255, 255, 0.8); /* Полупрозрачный фон */
+    border: 2px solid #333; /* Тёмная рамка */
+    border-radius: 50%; /* Круглые кнопки */
+    width: 70px; /* Увеличенный размер */
+    height: 70px;
+    font-size: 28px; /* Больше символы */
+    color: #333; /* Цвет текста */
     cursor: pointer;
-    pointer-events: auto; /* Включаем взаимодействие с кнопками */
+    pointer-events: auto; /* Включаем взаимодействие */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Тень для объема */
+    transition: transform 0.1s; /* Анимация при нажатии */
 }
 
 #controls button:hover {
-    background-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.1); /* Увеличение кнопки при наведении */
+}
+
+#controls button:active {
+    transform: scale(0.95); /* Сжатие кнопки при нажатии */
 }
