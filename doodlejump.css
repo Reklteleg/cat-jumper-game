@@ -6,3 +6,26 @@ body {
     /* background-color: green; */
     background-image: url("./doodlejumpbg.png");
 }
+#controls {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    pointer-events: none; /* Чтобы кнопки не мешали взаимодействию */
+}
+
+#controls button {
+    background-color: rgba(255, 255, 255, 0.5); /* Прозрачные кнопки */
+    border: 2px solid #000;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+    cursor: pointer;
+    pointer-events: auto; /* Включаем взаимодействие с кнопками */
+}
+
+#controls button:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+}
