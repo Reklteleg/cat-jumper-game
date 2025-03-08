@@ -1,11 +1,10 @@
-body {
-    text-align: center;
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    touch-action: none; /* Отключаем прокрутку */
 }
 
-#board {
-    /* background-color: green; */
-    background-image: url("./doodlejumpbg.png");
-}
 #controls {
     position: absolute;
     bottom: 20px;
